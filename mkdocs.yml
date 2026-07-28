@@ -42,7 +42,9 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Validation: validation.md
-  - Product Requirements: PRD.md
+  - Purpose & Scope: PRD.md
+  - Decisions:
+      - Discord = Local Storage account state: decisions/0001-discord-artifacts-in-local-storage-not-a-message-db.md
   - Privacy Policy: privacy.md
   - Terms of Service: terms.md
 
