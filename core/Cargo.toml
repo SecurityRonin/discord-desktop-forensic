@@ -25,6 +25,7 @@ leveldb-core = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
+chrono = { workspace = true }
 
 [dev-dependencies]
 rusty-leveldb = { workspace = true }
