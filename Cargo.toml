@@ -1,0 +1,75 @@
+[workspace]
+resolver = "2"
+members = [
+    "core",
+    "forensic",
+]
+# The fuzz crate is a standalone workspace (cargo-fuzz builds it in isolation);
+# it is deliberately NOT a member here.
+
+# Single source of truth for the fields every member shares (DRY): bump version /
+# edition / license here once; members inherit via `field.workspace = true`.
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/SecurityRonin/discord-desktop-forensic"
+homepage = "https://github.com/SecurityRonin/discord-desktop-forensic"
+authors = ["Albert Hui <albert@securityronin.com>"]
+readme = "README.md"
+categories = ["parsing"]
+
+[workspace.dependencies]
+# Intra-workspace: the analyzer depends on the reader.
+discord-desktop-core = { version = "0.1", path = "core" }
+# Fleet crates: `version + path` so the local checkout builds while the semver
+# requirement is honest (no wildcard) and consumers get the registry version once
+# each is published. These are unpublished Wave-1/2 outputs today — switch to
+# registry-only once each lands on crates.io.
+#
+# KNOWLEDGE leaf: Discord store paths + Chromium Local Storage key/encoding
+# constants. REUSE these; never re-hardcode a path or marker byte.
+forensicnomicon-core = { version = "1", path = "../../knowledge/forensicnomicon/crates/core", features = ["serde"] }
+# Panic-free bounded integer readers over untrusted bytes (the shared front door).
+safe-read = { version = "0.2", path = "../../utility/safe-read" }
+# Wave-2 storage readers this PARSER sits on top of. Discord is an
+# Electron/Chromium app; its account/token/recent state lives in Chromium
+# Local Storage (LevelDB). No SQLCipher — Discord keeps no local message DB.
+chromium-storage-localstorage = { version = "0.1", path = "../chromium-storage-forensic/chromium-storage-localstorage" }
+leveldb-core = { version = "0.1", path = "../leveldb-forensic/leveldb-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tempfile = "3"
+# Independent oracle for the committed structural tests: write real Chromium-shaped
+# Local Storage records into a real LevelDB, then decode them back through the full
+# stack (ground truth derivable from the construction).
+rusty-leveldb = "4"
+
+[workspace.lints.rust]
+# Forbid unsafe across the suite — these crates interpret untrusted, attacker-
+# controllable Discord artifacts (Paranoid Gatekeeper). Earns the
+# `unsafe-forbidden` README badge.
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all                      = { level = "warn", priority = -1 }
+pedantic                 = { level = "warn", priority = -1 }
+correctness              = { level = "deny", priority = -1 }
+suspicious               = { level = "deny", priority = -1 }
+# Panic-free production code: no unwrap/expect outside tests.
+unwrap_used              = { level = "deny", priority = 0 }
+expect_used              = { level = "deny", priority = 0 }
+# Pragmatic allows — stylistic pedantic lints that fight the domain.
+module_name_repetitions  = { level = "allow", priority = 1 }
+must_use_candidate       = { level = "allow", priority = 1 }
+missing_errors_doc       = { level = "allow", priority = 1 }
+missing_panics_doc       = { level = "allow", priority = 1 }
+cast_possible_truncation = { level = "allow", priority = 1 }
+cast_possible_wrap       = { level = "allow", priority = 1 }
+cast_sign_loss           = { level = "allow", priority = 1 }
+cast_precision_loss      = { level = "allow", priority = 1 }
+too_many_lines           = { level = "allow", priority = 1 }
+items_after_statements   = { level = "allow", priority = 1 }
+similar_names            = { level = "allow", priority = 1 }
+manual_let_else          = { level = "allow", priority = 1 }

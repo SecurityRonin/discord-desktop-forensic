@@ -1,0 +1,28 @@
+# cargo-vet config file.
+#
+# Scaffolding: the aggregate audit-set imports plus our own crates declared
+# FIRST-PARTY (audit-as-crates-io = false, per the fleet law) so a version bump
+# never demands a self-audit. The per-version third-party `[[exemptions]]` block
+# must be regenerated with `cargo vet` against the resolved graph before enabling
+# the vet CI job (see docs/validation.md → "Open scaffolding").
+
+[cargo-vet]
+version = "0.10"
+
+[imports.bytecode-alliance]
+url = "https://raw.githubusercontent.com/bytecodealliance/wasmtime/main/supply-chain/audits.toml"
+
+[imports.embark]
+url = "https://raw.githubusercontent.com/EmbarkStudios/rust-ecosystem/main/audits.toml"
+
+[imports.google]
+url = "https://raw.githubusercontent.com/google/rust-crate-audits/main/audits.toml"
+
+[imports.mozilla]
+url = "https://raw.githubusercontent.com/mozilla/supply-chain/main/audits.toml"
+
+[policy.discord-desktop-core]
+audit-as-crates-io = false
+
+[policy.discord-desktop-forensic]
+audit-as-crates-io = false
