@@ -5,4 +5,4 @@ allow-unwrap-in-tests = true
 allow-expect-in-tests = true
 
 # Product/format names that look like code identifiers to doc_markdown.
-doc-valid-idents = ["LevelDB", "IndexedDB", "SimpleCache", "WebKit", "UTF-16", "UTF-16LE", "Latin-1", "ISO-8859-1", "Chromium", "Electron", "localStorage", "MultiAccountStore", "SelectedGuildStore", "RecentVoiceChannelStore", "discordptb", "discordcanary", "tokenStatus", "snowflake", "DPAPI"]
+doc-valid-idents = ["LevelDB", "IndexedDB", "SimpleCache", "WebKit", "UTF-16", "UTF-16LE", "Latin-1", "ISO-8859-1", "Chromium", "Electron", "localStorage", "MultiAccountStore", "SelectedGuildStore", "RecentVoiceChannelStore", "discordptb", "discordcanary", "tokenStatus", "snowflake", "DPAPI", "AhnLab", "ASEC"]
