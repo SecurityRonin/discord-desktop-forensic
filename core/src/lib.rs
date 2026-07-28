@@ -131,7 +131,12 @@ impl DiscordArtifacts {
 /// already hold records from the [`chromium_storage_localstorage`] reader.
 #[must_use]
 pub fn decode_local_storage(records: &[LocalStorageRecord]) -> DiscordArtifacts {
-    DiscordArtifacts::default()
+    DiscordArtifacts {
+        tokens: token::extract_tokens(records),
+        accounts: account::extract_accounts(records),
+        recents: channel::extract_recent_channels(records),
+        origins: extract_origin_meta(records),
+    }
 }
 
 /// Read and interpret a Discord desktop **profile directory** (the Electron
