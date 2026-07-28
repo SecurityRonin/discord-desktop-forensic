@@ -106,8 +106,24 @@ pub struct TokenRecord {
 /// non-Discord origins are ignored.
 #[must_use]
 pub fn extract_tokens(records: &[LocalStorageRecord]) -> Vec<TokenRecord> {
-    let _ = records;
-    Vec::new()
+    records
+        .iter()
+        .filter_map(|record| match record {
+            LocalStorageRecord::Data {
+                origin,
+                script_key,
+                value,
+                seq,
+                deleted,
+            } if is_discord_origin(origin) && script_key.text == TOKEN_KEY => Some(TokenRecord {
+                origin: origin.clone(),
+                token: SensitiveToken::new(value.text.clone()),
+                seq: *seq,
+                deleted: *deleted,
+            }),
+            _ => None,
+        })
+        .collect()
 }
 
 #[cfg(test)]
