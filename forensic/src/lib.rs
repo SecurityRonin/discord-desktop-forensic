@@ -19,11 +19,165 @@
 #![forbid(unsafe_code)]
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 
+use discord_desktop_core::token::TokenRecord;
 use discord_desktop_core::DiscordArtifacts;
-use forensicnomicon_core::report::Finding;
+use forensicnomicon_core::report::{
+    Category, Evidence, Finding, Location, Observation, Severity, Source, SubjectRef,
+};
 
 /// The analyzer name stamped on every finding's [`Source`].
 pub const ANALYZER: &str = "discord-desktop-forensic";
+
+/// A Discord credential-exposure observation. Carries the redacted metadata that
+/// backs the finding — never the token secret itself.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum DiscordCredentialFinding {
+    /// A live Discord auth token is present in Local Storage — a bearer credential
+    /// granting full account access, and a prime info-stealer target.
+    AuthTokenPresent {
+        /// The Local Storage origin the token was stored under.
+        origin: String,
+        /// The token's length in bytes (its presence signal, never the secret).
+        token_len: usize,
+        /// LevelDB sequence number.
+        seq: u64,
+    },
+    /// A deleted Discord token record is still recoverable — residual credential
+    /// material that outlived its deletion.
+    DeletedTokenRecoverable {
+        /// The Local Storage origin the token was stored under.
+        origin: String,
+        /// The token's length in bytes.
+        token_len: usize,
+        /// LevelDB sequence number.
+        seq: u64,
+    },
+}
+
+impl DiscordCredentialFinding {
+    fn origin(&self) -> &str {
+        match self {
+            Self::AuthTokenPresent { origin, .. }
+            | Self::DeletedTokenRecoverable { origin, .. } => origin,
+        }
+    }
+
+    fn token_len(&self) -> usize {
+        match self {
+            Self::AuthTokenPresent { token_len, .. }
+            | Self::DeletedTokenRecoverable { token_len, .. } => *token_len,
+        }
+    }
+
+    fn seq(&self) -> u64 {
+        match self {
+            Self::AuthTokenPresent { seq, .. } | Self::DeletedTokenRecoverable { seq, .. } => *seq,
+        }
+    }
+}
+
+impl Observation for DiscordCredentialFinding {
+    fn severity(&self) -> Option<Severity> {
+        Some(match self {
+            Self::AuthTokenPresent { .. } => Severity::High,
+            Self::DeletedTokenRecoverable { .. } => Severity::Medium,
+        })
+    }
+
+    fn code(&self) -> &'static str {
+        match self {
+            Self::AuthTokenPresent { .. } => "DISCORD-AUTH-TOKEN-PRESENT",
+            Self::DeletedTokenRecoverable { .. } => "DISCORD-DELETED-TOKEN-RECOVERABLE",
+        }
+    }
+
+    // `TOKEN` is not one of Category::from_code's keywords, so classify explicitly.
+    fn category(&self) -> Category {
+        match self {
+            Self::AuthTokenPresent { .. } => Category::Threat,
+            Self::DeletedTokenRecoverable { .. } => Category::Residue,
+        }
+    }
+
+    fn note(&self) -> String {
+        match self {
+            Self::AuthTokenPresent {
+                origin, token_len, ..
+            } => format!(
+                "A Discord authentication token ({token_len} chars, redacted) is stored in \
+                 Local Storage at {origin} — a bearer credential that grants full account \
+                 access and is a known info-stealer target. Consistent with a signed-in \
+                 account recoverable from this artifact."
+            ),
+            Self::DeletedTokenRecoverable {
+                origin, token_len, ..
+            } => format!(
+                "A deleted Discord authentication token record ({token_len} chars, redacted) \
+                 remains recoverable in Local Storage at {origin} — residual credential \
+                 material that outlived its deletion."
+            ),
+        }
+    }
+
+    fn subjects(&self) -> Vec<SubjectRef> {
+        vec![SubjectRef {
+            scheme: "messenger".to_string(),
+            kind: "discord_auth_token".to_string(),
+            id: self.origin().to_string(),
+            label: Some("Discord".to_string()),
+        }]
+    }
+
+    fn evidence(&self) -> Vec<Evidence> {
+        vec![
+            Evidence {
+                field: "origin".to_string(),
+                value: self.origin().to_string(),
+                location: Some(Location::Path(self.origin().to_string())),
+            },
+            Evidence {
+                field: "token_length_chars".to_string(),
+                value: self.token_len().to_string(),
+                location: None,
+            },
+            Evidence {
+                field: "leveldb_seq".to_string(),
+                value: self.seq().to_string(),
+                location: Some(Location::RecordId(self.seq())),
+            },
+            Evidence {
+                field: "store".to_string(),
+                value: "Local Storage/leveldb".to_string(),
+                location: None,
+            },
+        ]
+    }
+
+    fn mitre(&self) -> &'static [&'static str] {
+        // T1528 — Steal Application Access Token.
+        &["T1528"]
+    }
+}
+
+/// Classify one token record into a credential-exposure observation.
+fn observe_token(record: &TokenRecord) -> DiscordCredentialFinding {
+    let origin = record.origin.clone();
+    let token_len = record.token.len();
+    let seq = record.seq;
+    if record.deleted {
+        DiscordCredentialFinding::DeletedTokenRecoverable {
+            origin,
+            token_len,
+            seq,
+        }
+    } else {
+        DiscordCredentialFinding::AuthTokenPresent {
+            origin,
+            token_len,
+            seq,
+        }
+    }
+}
 
 /// Audit recovered Discord artifacts and return normalized findings.
 ///
@@ -32,8 +186,19 @@ pub const ANALYZER: &str = "discord-desktop-forensic";
 /// credential material. Artifacts with no token yield no findings.
 #[must_use]
 pub fn audit_artifacts(artifacts: &DiscordArtifacts) -> Vec<Finding> {
-    let _ = artifacts;
-    Vec::new()
+    artifacts
+        .tokens
+        .iter()
+        .map(|record| {
+            let observation = observe_token(record);
+            let source = Source {
+                analyzer: ANALYZER.to_string(),
+                scope: record.origin.clone(),
+                version: Some(env!("CARGO_PKG_VERSION").to_string()),
+            };
+            observation.to_finding(source)
+        })
+        .collect()
 }
 
 #[cfg(test)]
