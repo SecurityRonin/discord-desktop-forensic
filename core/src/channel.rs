@@ -88,10 +88,50 @@ fn collect_snowflakes(value: &Value, out: &mut Vec<String>) {
 /// Extract Discord recent-channel / recent-guild references from decoded Local
 /// Storage records. Returns an empty vec when no recent-store record is present
 /// or parseable.
+/// Parse one recent-store JSON value into tagged [`RecentChannel`] entries.
+fn recents_from_store(origin: &str, kind: RecentKind, json: &str) -> Vec<RecentChannel> {
+    let Ok(value) = serde_json::from_str::<Value>(json) else {
+        return Vec::new();
+    };
+    let mut snowflakes = Vec::new();
+    collect_snowflakes(&value, &mut snowflakes);
+    snowflakes
+        .into_iter()
+        .map(|snowflake| {
+            let created_at_unix_ms = snowflake.parse::<u64>().ok().map(snowflake_timestamp_ms);
+            RecentChannel {
+                snowflake,
+                kind,
+                origin: origin.to_string(),
+                created_at_unix_ms,
+            }
+        })
+        .collect()
+}
+
 #[must_use]
 pub fn extract_recent_channels(records: &[LocalStorageRecord]) -> Vec<RecentChannel> {
-    let _ = records;
-    Vec::new()
+    records
+        .iter()
+        .filter_map(|record| match record {
+            LocalStorageRecord::Data {
+                origin,
+                script_key,
+                value,
+                deleted: false,
+                ..
+            } if is_discord_origin(origin) => {
+                let kind = match script_key.text.as_str() {
+                    SELECTED_GUILD_STORE => RecentKind::Guild,
+                    RECENT_VOICE_CHANNEL_STORE => RecentKind::VoiceChannel,
+                    _ => return None,
+                };
+                Some(recents_from_store(origin, kind, &value.text))
+            }
+            _ => None,
+        })
+        .flatten()
+        .collect()
 }
 
 #[cfg(test)]
