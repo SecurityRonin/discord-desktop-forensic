@@ -49,8 +49,10 @@ fn mint_discord_profile(dir: &Path) {
     let leveldb_dir = dir.join("Local Storage").join("leveldb");
     std::fs::create_dir_all(&leveldb_dir).unwrap();
 
-    let mut opt = rusty_leveldb::Options::default();
-    opt.create_if_missing = true;
+    let opt = rusty_leveldb::Options {
+        create_if_missing: true,
+        ..Default::default()
+    };
     let mut db = rusty_leveldb::DB::open(&leveldb_dir, opt).unwrap();
 
     db.put(&data_key(ORIGIN, "token"), &latin1_value(FIXTURE_TOKEN))
@@ -124,7 +126,7 @@ fn real_discord_profile_when_present() {
     );
     // Never assert on the secret's value — only its presence + length.
     for token in &artifacts.tokens {
-        assert!(token.token.len() > 0);
+        assert!(!token.token.is_empty());
         eprintln!(
             "real token: origin={} len={} seq={} deleted={}",
             token.origin,
