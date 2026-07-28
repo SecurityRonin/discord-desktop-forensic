@@ -1,0 +1,34 @@
+[package]
+name = "discord-desktop-forensic-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+# Standalone workspace: cargo-fuzz builds this crate in isolation, not as a
+# member of the main workspace it fuzzes.
+[workspace]
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+leveldb-core = { path = "../../leveldb-forensic/leveldb-core" }
+chromium-storage-localstorage = { path = "../../chromium-storage-forensic/chromium-storage-localstorage" }
+
+[dependencies.discord-desktop-core]
+path = "../core"
+
+[[bin]]
+name = "parse_local_storage"
+path = "fuzz_targets/parse_local_storage.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "parse_accounts"
+path = "fuzz_targets/parse_accounts.rs"
+test = false
+doc = false
+bench = false
