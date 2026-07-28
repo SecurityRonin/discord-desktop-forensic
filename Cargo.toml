@@ -40,6 +40,8 @@ leveldb-core = { version = "0.1", path = "../leveldb-forensic/leveldb-core" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
+# RFC 3339 rendering of decoded snowflake / WebKit timestamps for the timeline.
+chrono = { version = "0.4", default-features = false, features = ["std"] }
 tempfile = "3"
 # Independent oracle for the committed structural tests: write real Chromium-shaped
 # Local Storage records into a real LevelDB, then decode them back through the full
