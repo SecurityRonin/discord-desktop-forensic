@@ -29,6 +29,7 @@ thiserror = { workspace = true }
 [dev-dependencies]
 rusty-leveldb = { workspace = true }
 tempfile = { workspace = true }
+serde_json = { workspace = true }
 
 [lints]
 workspace = true
