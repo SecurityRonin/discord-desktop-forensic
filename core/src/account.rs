@@ -77,10 +77,80 @@ fn json_string(text: &str) -> Option<String> {
 /// The rich rows come from `MultiAccountStore`; the active session's cached email
 /// is attached to the matching account. Returns an empty vec when no identity
 /// record is present or parseable.
+/// Parse the `MultiAccountStore` JSON `_state.users[]` array into accounts.
+fn accounts_from_store(origin: &str, json: &str) -> Vec<Account> {
+    let Ok(root) = serde_json::from_str::<Value>(json) else {
+        return Vec::new();
+    };
+    let Some(users) = root
+        .get("_state")
+        .and_then(|s| s.get("users"))
+        .and_then(Value::as_array)
+    else {
+        return Vec::new();
+    };
+    users
+        .iter()
+        .map(|u| Account {
+            user_id: u.get("id").and_then(Value::as_str).map(String::from),
+            username: u.get("username").and_then(Value::as_str).map(String::from),
+            discriminator: u
+                .get("discriminator")
+                .and_then(Value::as_str)
+                .map(String::from),
+            avatar: u.get("avatar").and_then(Value::as_str).map(String::from),
+            email: None,
+            token_status: u.get("tokenStatus").and_then(Value::as_i64),
+            origin: origin.to_string(),
+        })
+        .collect()
+}
+
 #[must_use]
 pub fn extract_accounts(records: &[LocalStorageRecord]) -> Vec<Account> {
-    let _ = records;
-    Vec::new()
+    let mut accounts = Vec::new();
+    let mut active_id: Option<String> = None;
+    let mut active_email: Option<String> = None;
+    let mut active_origin = String::new();
+
+    for datum in discord_data(records) {
+        match datum.key {
+            MULTI_ACCOUNT_STORE => accounts.extend(accounts_from_store(datum.origin, datum.value)),
+            USER_ID_CACHE => {
+                if let Some(id) = json_string(datum.value) {
+                    active_id = Some(id);
+                    active_origin = datum.origin.to_string();
+                }
+            }
+            EMAIL_CACHE => {
+                if let Some(email) = json_string(datum.value) {
+                    active_email = Some(email);
+                    active_origin = datum.origin.to_string();
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // Attach the cached email to the active account (matched by id), or — when the
+    // store was absent — synthesize a minimal account from the session caches.
+    if active_email.is_some() || active_id.is_some() {
+        let matched = active_id
+            .as_ref()
+            .and_then(|id| accounts.iter().position(|a| a.user_id.as_ref() == Some(id)));
+        if let Some(i) = matched {
+            accounts[i].email = active_email;
+        } else if accounts.is_empty() {
+            accounts.push(Account {
+                user_id: active_id,
+                email: active_email,
+                origin: active_origin,
+                ..Account::default()
+            });
+        }
+    }
+
+    accounts
 }
 
 #[cfg(test)]
