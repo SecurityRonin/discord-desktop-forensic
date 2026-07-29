@@ -1,10 +1,5 @@
-# cargo-vet config file.
-#
-# Scaffolding: the aggregate audit-set imports plus our own crates declared
-# FIRST-PARTY (audit-as-crates-io = false, per the fleet law) so a version bump
-# never demands a self-audit. The per-version third-party `[[exemptions]]` block
-# must be regenerated with `cargo vet` against the resolved graph before enabling
-# the vet CI job (see docs/validation.md → "Open scaffolding").
+
+# cargo-vet config file
 
 [cargo-vet]
 version = "0.10"
