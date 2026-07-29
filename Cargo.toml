@@ -22,21 +22,19 @@ categories = ["parsing"]
 [workspace.dependencies]
 # Intra-workspace: the analyzer depends on the reader.
 discord-desktop-core = { version = "0.1", path = "core" }
-# Fleet crates: `version + path` so the local checkout builds while the semver
-# requirement is honest (no wildcard) and consumers get the registry version once
-# each is published. These are unpublished Wave-1/2 outputs today — switch to
-# registry-only once each lands on crates.io.
+# Fleet crates: registry carets — each is now published on crates.io, so the
+# PARSER consumes the published version (no local path).
 #
 # KNOWLEDGE leaf: Discord store paths + Chromium Local Storage key/encoding
 # constants. REUSE these; never re-hardcode a path or marker byte.
-forensicnomicon-core = { version = "1", path = "../../knowledge/forensicnomicon/crates/core", features = ["serde"] }
+forensicnomicon-core = { version = "1.5", features = ["serde"] }
 # Panic-free bounded integer readers over untrusted bytes (the shared front door).
-safe-read = { version = "0.2", path = "../../utility/safe-read" }
+safe-read = "0.2"
 # Wave-2 storage readers this PARSER sits on top of. Discord is an
 # Electron/Chromium app; its account/token/recent state lives in Chromium
 # Local Storage (LevelDB). No SQLCipher — Discord keeps no local message DB.
-chromium-storage-localstorage = { version = "0.1", path = "../chromium-storage-forensic/chromium-storage-localstorage" }
-leveldb-core = { version = "0.1", path = "../leveldb-forensic/leveldb-core" }
+chromium-storage-localstorage = "0.1"
+leveldb-core = "0.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"

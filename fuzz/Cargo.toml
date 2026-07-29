@@ -13,8 +13,8 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-leveldb-core = { path = "../../leveldb-forensic/leveldb-core" }
-chromium-storage-localstorage = { path = "../../chromium-storage-forensic/chromium-storage-localstorage" }
+leveldb-core = "0.1"
+chromium-storage-localstorage = "0.1"
 
 [dependencies.discord-desktop-core]
 path = "../core"

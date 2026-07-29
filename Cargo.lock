@@ -39,6 +39,8 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 [[package]]
 name = "chromium-storage-localstorage"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70e4fbdf93b8e5b5b799c4865003abf6c83e9bbfad2d39eebfa97eeef1d08014"
 dependencies = [
  "forensicnomicon-core",
  "leveldb-core",
@@ -133,7 +135,9 @@ checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
 name = "forensicnomicon-core"
-version = "1.4.0"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "21800c5e29085274fbb324be30790894481c9c5faf8c659b3d0d994840ca0941"
 dependencies = [
  "serde",
 ]
@@ -191,6 +195,8 @@ checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 [[package]]
 name = "leveldb-core"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "00bdc833b0e7999e0a8a9b09e98a48b6ef657f9ae37aa7d909b5891fba2e16cd"
 dependencies = [
  "crc32c",
  "integer-encoding 4.1.0",
@@ -332,7 +338,9 @@ dependencies = [
 
 [[package]]
 name = "safe-read"
-version = "0.2.0"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "64d801355149a8e005d4736b4b7c7871e65b5797c31bc9930f5a5483e8368a47"
 
 [[package]]
 name = "semver"
