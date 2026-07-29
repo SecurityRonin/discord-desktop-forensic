@@ -21,3 +21,203 @@ audit-as-crates-io = false
 
 [policy.discord-desktop-forensic]
 audit-as-crates-io = false
+
+[[exemptions.autocfg]]
+version = "1.5.1"
+criteria = "safe-to-deploy"
+
+[[exemptions.bitflags]]
+version = "2.13.1"
+criteria = "safe-to-run"
+
+[[exemptions.bytes]]
+version = "1.12.1"
+criteria = "safe-to-run"
+
+[[exemptions.cc]]
+version = "1.4.0"
+criteria = "safe-to-run"
+
+[[exemptions.cfg-if]]
+version = "1.0.4"
+criteria = "safe-to-run"
+
+[[exemptions.chromium-storage-localstorage]]
+version = "0.1.0"
+criteria = "safe-to-deploy"
+
+[[exemptions.chrono]]
+version = "0.4.45"
+criteria = "safe-to-deploy"
+
+[[exemptions.crc32c]]
+version = "0.6.8"
+criteria = "safe-to-deploy"
+
+[[exemptions.errno]]
+version = "0.3.14"
+criteria = "safe-to-run"
+
+[[exemptions.fastrand]]
+version = "2.5.0"
+criteria = "safe-to-run"
+
+[[exemptions.find-msvc-tools]]
+version = "0.1.9"
+criteria = "safe-to-run"
+
+[[exemptions.forensicnomicon-core]]
+version = "1.5.0"
+criteria = "safe-to-deploy"
+
+[[exemptions.fs2]]
+version = "0.4.3"
+criteria = "safe-to-run"
+
+[[exemptions.getrandom]]
+version = "0.2.17"
+criteria = "safe-to-run"
+
+[[exemptions.getrandom]]
+version = "0.4.3"
+criteria = "safe-to-run"
+
+[[exemptions.integer-encoding]]
+version = "3.0.4"
+criteria = "safe-to-run"
+
+[[exemptions.integer-encoding]]
+version = "4.1.0"
+criteria = "safe-to-deploy"
+
+[[exemptions.itoa]]
+version = "1.0.18"
+criteria = "safe-to-deploy"
+
+[[exemptions.leveldb-core]]
+version = "0.1.1"
+criteria = "safe-to-deploy"
+
+[[exemptions.libc]]
+version = "0.2.189"
+criteria = "safe-to-run"
+
+[[exemptions.linux-raw-sys]]
+version = "0.12.1"
+criteria = "safe-to-run"
+
+[[exemptions.memchr]]
+version = "2.8.3"
+criteria = "safe-to-deploy"
+
+[[exemptions.once_cell]]
+version = "1.21.4"
+criteria = "safe-to-run"
+
+[[exemptions.proc-macro2]]
+version = "1.0.107"
+criteria = "safe-to-deploy"
+
+[[exemptions.r-efi]]
+version = "6.0.0"
+criteria = "safe-to-run"
+
+[[exemptions.rand]]
+version = "0.8.7"
+criteria = "safe-to-run"
+
+[[exemptions.rustc_version]]
+version = "0.4.1"
+criteria = "safe-to-deploy"
+
+[[exemptions.rustix]]
+version = "1.1.4"
+criteria = "safe-to-run"
+
+[[exemptions.rusty-leveldb]]
+version = "4.0.1"
+criteria = "safe-to-run"
+
+[[exemptions.safe-read]]
+version = "0.2.1"
+criteria = "safe-to-deploy"
+
+[[exemptions.semver]]
+version = "1.0.28"
+criteria = "safe-to-deploy"
+
+[[exemptions.serde]]
+version = "1.0.229"
+criteria = "safe-to-deploy"
+
+[[exemptions.serde_core]]
+version = "1.0.229"
+criteria = "safe-to-deploy"
+
+[[exemptions.serde_derive]]
+version = "1.0.229"
+criteria = "safe-to-deploy"
+
+[[exemptions.serde_json]]
+version = "1.0.151"
+criteria = "safe-to-deploy"
+
+[[exemptions.shlex]]
+version = "2.0.1"
+criteria = "safe-to-run"
+
+[[exemptions.snap]]
+version = "1.1.2"
+criteria = "safe-to-deploy"
+
+[[exemptions.syn]]
+version = "2.0.119"
+criteria = "safe-to-run"
+
+[[exemptions.syn]]
+version = "3.0.3"
+criteria = "safe-to-deploy"
+
+[[exemptions.thiserror]]
+version = "2.0.19"
+criteria = "safe-to-deploy"
+
+[[exemptions.thiserror-impl]]
+version = "2.0.19"
+criteria = "safe-to-deploy"
+
+[[exemptions.unicode-ident]]
+version = "1.0.24"
+criteria = "safe-to-deploy"
+
+[[exemptions.wasi]]
+version = "0.11.1+wasi-snapshot-preview1"
+criteria = "safe-to-run"
+
+[[exemptions.winapi-i686-pc-windows-gnu]]
+version = "0.4.0"
+criteria = "safe-to-run"
+
+[[exemptions.winapi-x86_64-pc-windows-gnu]]
+version = "0.4.0"
+criteria = "safe-to-run"
+
+[[exemptions.windows-link]]
+version = "0.2.1"
+criteria = "safe-to-run"
+
+[[exemptions.windows-sys]]
+version = "0.61.2"
+criteria = "safe-to-run"
+
+[[exemptions.zerocopy]]
+version = "0.8.55"
+criteria = "safe-to-run"
+
+[[exemptions.zerocopy-derive]]
+version = "0.8.55"
+criteria = "safe-to-run"
+
+[[exemptions.zmij]]
+version = "1.0.23"
+criteria = "safe-to-deploy"

@@ -15,6 +15,12 @@ notes = "As advertised: a numeric library. The only `unsafe` is from some float-
 
 [audits.embark.audits]
 
+[[audits.google.audits.errno]]
+who = "George Burgess IV <gbiv@google.com>"
+criteria = "safe-to-run"
+version = "0.2.8"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
 [[audits.google.audits.ppv-lite86]]
 who = "danakj@chromium.org"
 criteria = "safe-to-run"
