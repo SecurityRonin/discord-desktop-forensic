@@ -16,12 +16,20 @@ that yielded real data:
 2. Public third-party DFIR sample (tier-1) — *not needed*; step 1 yielded real data.
 3. Structure-only minted store (tier-2/3) — used **in addition**, as the committed
    CI gate (below), because the real profile is host-only and cannot be committed.
+4. **Independent re-implementation differential (tier-1) — used** for the Chromium
+   Local Storage decode our reader sits on: the same on-disk LevelDB bytes are
+   decoded by `cclgroupltd/ccl_chromium_reader` and reconciled record-for-record
+   (see "Differential against ccl_chromium_reader" below).
 
-**No independent third-party message corpus with a published answer key was used**
-— Discord keeps no local message database, and no public Discord Local Storage
-corpus with ground truth was located. The account/token/recent evidence is
-therefore validated at **tier-2** (real app-authored bytes, scenario chosen by
-us), never tier-1. What would upgrade it: a published DFIR test image containing a
+**Two distinct layers, two distinct tiers.** The **Chromium Local Storage decode**
+(origin / script-key / value) our Discord reader consumes is now reconciled against
+an **independent third-party decoder** (ccl) on the same bytes — **tier-1** for that
+storage layer. The **Discord-specific interpretation** on top (token redaction,
+`MultiAccountStore` identity, snowflake recovery) is validated at **tier-2** (real
+app-authored bytes, scenario chosen by us) / tier-3 (minted record content), because
+no public Discord Local Storage corpus with a documented ground-truth
+account/token was located — Discord keeps no local message database. What would
+upgrade that interpretation layer to tier-1: a published DFIR test image containing a
 Discord profile with a documented ground-truth account/token (e.g. a DLEAPP /
 Abrignoni-style sample), reconciled here.
 
@@ -75,6 +83,47 @@ rusty-leveldb (writer)  →  leveldb-core  →  chromium-storage-localstorage  �
   self-authored. It is honest regression scaffolding — it proves the decode is
   self-consistent and panic-free, not that it matches an external answer key. The
   tier-2 real-profile run above is the non-circular check on the decode.
+
+## Differential against ccl_chromium_reader (tier 1)
+
+`core/tests/differential_ccl.rs::differential_matches_ccl_chromium_reader`
+reconciles the **Chromium Local Storage decode our Discord reader consumes**
+(`chromium_storage_localstorage::read_dir`) against the independent Python
+re-implementation
+[`cclgroupltd/ccl_chromium_reader`](https://github.com/cclgroupltd/ccl_chromium_reader),
+reading the **same** on-disk LevelDB bytes. Two decoders authored by different
+parties agreeing on the record set is tier-1 evidence for that storage layer: the
+answer key is CCL's, not ours.
+
+- **Store:** the repo's existing minted Discord Local Storage fixture — the same
+  `rusty-leveldb`-written store `core/tests/oracle.rs` builds (origin
+  `https://ptb.discord.com`; script keys `token`, `MultiAccountStore`,
+  `SelectedGuildStore`) — so the differential needs zero host state. Set
+  `CCL_DISCORD_DIR` to point at a real copied Chromium `Local Storage/leveldb`
+  directory instead.
+- **Reconciliation:** our full record stream (tombstones + superseded versions
+  retained) is collapsed to the same *live view* ccl exposes
+  (`iter_all_records(include_deletions=False)`) — per `(origin, script_key)` the
+  highest-seq, non-deleted record — then the live `(origin, script_key, value)`
+  triple sets are asserted **equal**. Metadata origins from ccl's `iter_metadata`
+  must be a subset of ours. Divergence fails loud, printing the symmetric
+  set-difference.
+- **Result:** on the minted store the two decoders agree exactly — all three live
+  records reconcile (`token`, `MultiAccountStore`, `SelectedGuildStore`), decoded
+  origin/script-key/value identical on both sides.
+- **Gating:** env-gated on `CCL_DISCORD_ORACLE` — a Python interpreter that can
+  `import ccl_chromium_reader`. Unset ⇒ the test skips cleanly (the committed
+  workspace gate never depends on the oracle); set ⇒ any oracle error fails loud
+  (a broken interpreter is a bootstrap failure, not a silent skip). The bundled
+  driver is `core/tests/ccl_oracle.py`.
+
+To reproduce:
+
+```bash
+PYTHONPATH=/path/to/ccl_chromium_reader \
+  CCL_DISCORD_ORACLE=$(which python3) \
+  cargo test -p discord-desktop-core --test differential_ccl -- --nocapture
+```
 
 ## Panic-freedom — fuzzing (tier-2)
 
