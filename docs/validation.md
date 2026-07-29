@@ -111,6 +111,14 @@ answer key is CCL's, not ours.
 - **Result:** on the minted store the two decoders agree exactly — all three live
   records reconcile (`token`, `MultiAccountStore`, `SelectedGuildStore`), decoded
   origin/script-key/value identical on both sides.
+- **Scope (honest):** the committed fixture writes each key **once**, so it lives
+  entirely in the LevelDB `.log` memtable and exercises neither SSTable (`.ldb`)
+  compaction nor multi-version seq-resolution — the two substantive parts of
+  LevelDB decoding. Those are exercised only via `CCL_DISCORD_DIR` pointed at a
+  real, multi-write Chromium store; there the seq-collapse above (highest-seq per
+  key on **both** sides) is what makes the sets reconcile. So the committed gate
+  is a *floor* (independent decoders agree on a small live store); the real-store
+  path is where the tier-1 evidence extends to compacted, multi-version data.
 - **Gating:** env-gated on `CCL_DISCORD_ORACLE` — a Python interpreter that can
   `import ccl_chromium_reader`. Unset ⇒ the test skips cleanly (the committed
   workspace gate never depends on the oracle); set ⇒ any oracle error fails loud

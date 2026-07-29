@@ -49,11 +49,20 @@ def main(argv: list[str]) -> int:
         out = []
         for meta in db.iter_metadata():
             out.append(f"ORIGIN\t{_hex(meta.storage_key)}")
+        # ccl's iter_all_records yields EVERY live seq version of every key, but
+        # our reader (and Chromium itself) presents the single latest value per
+        # key. Collapse to highest-leveldb_seq_number per (storage_key, script_key)
+        # so both sides compare the same live view — otherwise the sets agree only
+        # on write-once keys (they diverge on any real multi-version store).
+        latest: dict[tuple[str, str], object] = {}
         for rec in db.iter_all_records(include_deletions=False):
-            # A live record's value is never None; guard anyway rather than
-            # emit a bogus row.
             if rec.value is None:
                 continue
+            k = (rec.storage_key, rec.script_key)
+            cur = latest.get(k)
+            if cur is None or rec.leveldb_seq_number > cur.leveldb_seq_number:
+                latest[k] = rec
+        for rec in latest.values():
             out.append(
                 "DATA\t"
                 f"{_hex(rec.storage_key)}\t{_hex(rec.script_key)}\t{_hex(rec.value)}"
