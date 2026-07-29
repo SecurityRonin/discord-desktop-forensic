@@ -150,8 +150,10 @@ mod tests {
         }
     }
 
-    // A structurally-realistic Discord token: MTk4... base64-ish, 3 dot-separated
-    // parts. NOT a real credential — a synthetic fixture in the documented shape.
+    // A synthetic fixture in the 3-dot-separated Discord token shape. The first
+    // segment is deliberately NOT a 24-char base64 snowflake so it does not match
+    // real-secret detectors (gitleaks / GitHub push protection) — this is test
+    // data, never a real credential, and the extractor keys on the "token" name.
     const FAKE_TOKEN: &str = "EXAMPLE-synthetic-fixture.not-real.discord-token-value-for-tests";
 
     #[test]
