@@ -1,0 +1,308 @@
+
+# cargo-vet audits file
+
+[[audits.autocfg]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.5.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.bitflags]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "2.13.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.bytes]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "1.12.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.cc]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "1.4.0"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.cfg-if]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "1.0.4"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.chromium-storage-localstorage]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "0.1.0"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.chrono]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "0.4.45"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.crc32c]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "0.6.8"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.errno]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.2.8"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.errno]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.3.14"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.fastrand]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "2.5.0"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.find-msvc-tools]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.1.9"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.forensicnomicon-core]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.5.0"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.fs2]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.4.3"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.getrandom]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.2.17"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.getrandom]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.4.3"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.integer-encoding]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "3.0.4"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.integer-encoding]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "4.1.0"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.itoa]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.0.18"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.leveldb-core]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "0.1.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.libc]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.2.189"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.linux-raw-sys]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.12.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.memchr]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "2.8.3"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.once_cell]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "1.21.4"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.proc-macro2]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.0.107"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.r-efi]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "6.0.0"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.rand]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.8.7"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.rustc_version]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "0.4.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.rustix]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "1.1.4"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.rusty-leveldb]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "4.0.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.safe-read]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "0.2.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.semver]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.0.28"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.serde]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.0.229"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.serde_core]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.0.229"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.serde_derive]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.0.229"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.serde_json]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.0.151"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.shlex]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "2.0.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.snap]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.1.2"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.syn]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "2.0.119"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.syn]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "3.0.3"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.thiserror]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "2.0.19"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.thiserror-impl]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "2.0.19"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.unicode-ident]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.0.24"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.wasi]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.11.1+wasi-snapshot-preview1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.winapi-i686-pc-windows-gnu]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.4.0"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.winapi-x86_64-pc-windows-gnu]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.4.0"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.windows-link]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.2.1"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.windows-sys]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.61.2"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.zerocopy]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.8.55"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.zerocopy-derive]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-run"
+version = "0.8.55"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
+
+[[audits.zmij]]
+who = "Albert Hui <albert@securityronin.com>"
+criteria = "safe-to-deploy"
+version = "1.0.23"
+notes = "Self-certified for the discord-desktop-forensic publish chain (fleet registry-migration); source-reviewed, no untrusted-code injection concern."
