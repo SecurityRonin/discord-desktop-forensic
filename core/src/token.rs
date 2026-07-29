@@ -206,6 +206,19 @@ mod tests {
     }
 
     #[test]
+    fn is_empty_reflects_cleared_versus_present_token() {
+        // A cleared/tombstoned record carries an empty token string.
+        let cleared = SensitiveToken::new("");
+        assert!(cleared.is_empty(), "empty token reports empty");
+        assert_eq!(cleared.len(), 0);
+
+        // A present token is non-empty.
+        let present = SensitiveToken::new(FAKE_TOKEN);
+        assert!(!present.is_empty(), "present token reports non-empty");
+        assert_eq!(present.len(), FAKE_TOKEN.len());
+    }
+
+    #[test]
     fn serde_output_redacts_the_secret() {
         let records = vec![data("https://discord.com", "token", FAKE_TOKEN, 5)];
         let tokens = extract_tokens(&records);
