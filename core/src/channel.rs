@@ -64,7 +64,12 @@ pub fn snowflake_timestamp_ms(id: u64) -> u64 {
 }
 
 /// What a [`RecentChannel`] entry refers to.
+///
+/// `#[non_exhaustive]`: Discord adds Local-Storage record shapes over time, so new
+/// kinds are expected. Marking it here (in the same breaking release that added
+/// `TextChannel`/`Unattributed`) makes every future variant additive.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[non_exhaustive]
 pub enum RecentKind {
     /// A guild (server) id — from the guild-timestamp map, `selectedGuildId` or
     /// `lastSelectedGuildId`.
@@ -81,7 +86,12 @@ pub enum RecentKind {
 }
 
 /// A recent channel/guild reference recovered from Local Storage.
+///
+/// `#[non_exhaustive]`: further per-entry facts (selection counts, guild ids for
+/// channels) are expected as more record shapes are modelled. Marking it in the
+/// same breaking release as `selected_at_unix_ms` makes future fields additive.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[non_exhaustive]
 pub struct RecentChannel {
     /// The Discord snowflake id (decimal string, as stored).
     pub snowflake: String,

@@ -155,6 +155,16 @@ reconciliation, over a minted store whose recorded selection time is 3,079 days
 away from the guild id's creation time — so substituting one for the other cannot
 pass unnoticed.
 
+**Provenance of the error-magnitude figures (read this before citing them).** The
+fix's commit message quotes a median error of 708 days and a worst case of 2,163
+days. Those were measured in an earlier session against a **real `discordptb`
+profile on the development host** — they are *not* reproducible from anything
+committed here, and no per-value dataset is retained (the profile copy was purged
+and is not ours to publish). Treat them as an **unretained host measurement**, not
+as evidence this repo can re-verify. The verifiable, committed evidence for the
+same defect is the fixture's own **3,079-day** selection-vs-creation gap in the
+tests named above. Cite that figure, not the host numbers.
+
 ## Panic-freedom — fuzzing (tier-2)
 
 Two `cargo-fuzz` targets exercise every parsed structure against arbitrary input
