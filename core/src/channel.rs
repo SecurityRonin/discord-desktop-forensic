@@ -1,18 +1,36 @@
 //! Discord **recent channels / guilds** from Local Storage.
 //!
 //! Discord caches the user's navigation state in `localStorage`: the
-//! `SelectedGuildStore` record (the last-selected guild/server) and the
-//! `RecentVoiceChannelStore` record (recently-joined voice channels). Their values
-//! are JSON documents embedding Discord **snowflake** ids — 64-bit ids whose high
-//! bits encode the creation time.
+//! `SelectedGuildStore` record (guild selection, with the time of each selection)
+//! and the `RecentVoiceChannelStore` record (recent voice **and text** channels).
+//! Their values are JSON documents — a Flux store payload wrapped in `_state` —
+//! embedding Discord **snowflake** ids, 64-bit ids whose high bits encode the id's
+//! creation time.
 //!
-//! This module pulls every snowflake out of those records into [`RecentChannel`]
-//! entries and decodes each snowflake's embedded creation timestamp
-//! ([`snowflake_timestamp_ms`]). Extraction is schema-tolerant: it collects any
-//! snowflake-shaped id anywhere in the JSON rather than pinning to one exact
-//! layout, so a client version that reshapes the record still yields the ids.
+//! Each [`RecentChannel`] therefore carries **two independent times**, never
+//! conflated:
 //!
-//! Snowflake reference: <https://discord.com/developers/docs/reference#snowflakes>
+//! * [`RecentChannel::selected_at_unix_ms`] — the **activity** time, read from
+//!   `SelectedGuildStore._state.selectedGuildTimestampMillis` (a guildId → epoch
+//!   milliseconds map of when each guild was last selected). `None` when the store
+//!   recorded none for that id; the creation time is never substituted for it.
+//! * [`RecentChannel::created_at_unix_ms`] — the **creation** time of the entity
+//!   the id names, decoded from the snowflake itself ([`snowflake_timestamp_ms`]).
+//!   For a guild joined long after it was created the two are years apart.
+//!
+//! Ids are attributed by the documented layout — the guild-timestamp map and
+//! `selectedGuildId`/`lastSelectedGuildId` for guilds, `voiceChannelHistory` and
+//! `textChannelHistory` for channels — so the *store* name never decides the kind
+//! of an id inside it. Extraction stays schema-tolerant: any other
+//! snowflake-shaped id anywhere in the record still surfaces, as
+//! [`RecentKind::Unattributed`] rather than guessed into a kind.
+//!
+//! # Sources
+//!
+//! - Snowflake layout / epoch: <https://discord.com/developers/docs/reference#snowflakes>
+//! - Store keys and the selection-time semantics follow DLEAPP's
+//!   `scripts/artifacts/discordLocalStorage.py` (`discordActivity`):
+//!   <https://github.com/abrignoni/DLEAPP>
 
 use crate::{is_discord_origin, LocalStorageRecord};
 use serde::Serialize;
@@ -22,23 +40,44 @@ use serde_json::Value;
 const SELECTED_GUILD_STORE: &str = "SelectedGuildStore";
 const RECENT_VOICE_CHANNEL_STORE: &str = "RecentVoiceChannelStore";
 
+/// Keys inside `SelectedGuildStore._state`.
+const SELECTED_GUILD_TIMESTAMP_MILLIS: &str = "selectedGuildTimestampMillis";
+const SELECTED_GUILD_ID: &str = "selectedGuildId";
+const LAST_SELECTED_GUILD_ID: &str = "lastSelectedGuildId";
+
+/// Keys inside `RecentVoiceChannelStore._state` — the store holds two lists.
+const VOICE_CHANNEL_HISTORY: &str = "voiceChannelHistory";
+const TEXT_CHANNEL_HISTORY: &str = "textChannelHistory";
+
 /// Discord snowflake epoch: the first second of 2015, in Unix milliseconds.
 /// A snowflake's timestamp is `(id >> 22) + DISCORD_EPOCH_MS`.
 pub const DISCORD_EPOCH_MS: u64 = 1_420_070_400_000;
 
-/// Decode the creation time embedded in a Discord snowflake id, as Unix ms.
+/// Decode the **creation** time embedded in a Discord snowflake id, as Unix ms.
+///
+/// This is when the guild/channel/user the id names came into existence — not
+/// when it was last visited. For an activity time use
+/// [`RecentChannel::selected_at_unix_ms`].
 #[must_use]
 pub fn snowflake_timestamp_ms(id: u64) -> u64 {
     (id >> 22) + DISCORD_EPOCH_MS
 }
 
-/// What a [`RecentChannel`] entry refers to — the store it came from.
+/// What a [`RecentChannel`] entry refers to.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 pub enum RecentKind {
-    /// A guild (server) id from `SelectedGuildStore`.
+    /// A guild (server) id — from the guild-timestamp map, `selectedGuildId` or
+    /// `lastSelectedGuildId`.
     Guild,
-    /// A voice-channel id from `RecentVoiceChannelStore`.
+    /// A voice-channel id — from `RecentVoiceChannelStore._state.voiceChannelHistory`.
     VoiceChannel,
+    /// A text-channel id — from `RecentVoiceChannelStore._state.textChannelHistory`.
+    TextChannel,
+    /// A snowflake recovered from a recent-navigation record whose role in the
+    /// record's layout could not be determined (a reshaped client version, a key
+    /// this reader does not model). The id is reported rather than dropped, and
+    /// deliberately not labelled guild/voice/text.
+    Unattributed,
 }
 
 /// A recent channel/guild reference recovered from Local Storage.
@@ -46,13 +85,18 @@ pub enum RecentKind {
 pub struct RecentChannel {
     /// The Discord snowflake id (decimal string, as stored).
     pub snowflake: String,
-    /// Whether this is a guild or a voice channel.
+    /// What the id refers to, per the record's documented layout.
     pub kind: RecentKind,
     /// The Local Storage origin the reference was stored under.
     pub origin: String,
-    /// The snowflake's embedded creation time, Unix ms (decoded), when the id
-    /// parses as a `u64`.
+    /// The **creation** time of the entity the id names: the snowflake's embedded
+    /// timestamp, Unix ms, when the id parses as a `u64`. Not an activity time.
     pub created_at_unix_ms: Option<u64>,
+    /// The **activity** time Discord recorded for this id — when the guild was
+    /// last selected, Unix ms, from `selectedGuildTimestampMillis`. `None` when
+    /// the store holds no selection time for it (never back-filled from
+    /// [`Self::created_at_unix_ms`], which is a different fact).
+    pub selected_at_unix_ms: Option<u64>,
 }
 
 /// Is `s` a Discord snowflake — a 17–20 digit decimal that fits in a `u64`?
@@ -85,30 +129,125 @@ fn collect_snowflakes(value: &Value, out: &mut Vec<String>) {
     }
 }
 
-/// Extract Discord recent-channel / recent-guild references from decoded Local
-/// Storage records. Returns an empty vec when no recent-store record is present
-/// or parseable.
-/// Parse one recent-store JSON value into tagged [`RecentChannel`] entries.
-fn recents_from_store(origin: &str, kind: RecentKind, json: &str) -> Vec<RecentChannel> {
+/// Which recent-navigation store a record came from.
+#[derive(Clone, Copy)]
+enum RecentStore {
+    /// `SelectedGuildStore` — guild selection, with per-guild selection times.
+    SelectedGuild,
+    /// `RecentVoiceChannelStore` — recent voice **and** text channel history.
+    RecentVoiceChannel,
+}
+
+/// Unwrap a Flux store payload: current clients serialize `{"_state": {…}}`,
+/// older ones store the state object bare.
+fn state_of(value: &Value) -> &Value {
+    value.get("_state").unwrap_or(value)
+}
+
+/// Read an epoch-millisecond value, which real records carry as a JSON number
+/// and some client versions as a decimal string.
+fn epoch_ms(value: &Value) -> Option<u64> {
+    value.as_u64().or_else(|| value.as_str()?.parse().ok())
+}
+
+/// Add one entry, keeping the first (most specific) attribution of an id within a
+/// record — the guild-timestamp map is walked before the bare selected-guild keys,
+/// so an id with a recorded selection time keeps it.
+fn push_recent(
+    out: &mut Vec<RecentChannel>,
+    origin: &str,
+    snowflake: String,
+    kind: RecentKind,
+    selected_at_unix_ms: Option<u64>,
+) {
+    if out.iter().any(|entry| entry.snowflake == snowflake) {
+        return;
+    }
+    let created_at_unix_ms = snowflake.parse::<u64>().ok().map(snowflake_timestamp_ms);
+    out.push(RecentChannel {
+        snowflake,
+        kind,
+        origin: origin.to_string(),
+        created_at_unix_ms,
+        selected_at_unix_ms,
+    });
+}
+
+/// Attribute the ids a store's documented layout gives a kind — and, for a guild,
+/// the selection time recorded alongside it.
+fn attributed_recents(
+    store: RecentStore,
+    state: &Value,
+    origin: &str,
+    out: &mut Vec<RecentChannel>,
+) {
+    match store {
+        RecentStore::SelectedGuild => {
+            // guildId -> epoch ms of the last selection: the activity time.
+            if let Some(map) = state
+                .get(SELECTED_GUILD_TIMESTAMP_MILLIS)
+                .and_then(Value::as_object)
+            {
+                for (guild_id, when) in map {
+                    if is_snowflake(guild_id) {
+                        push_recent(
+                            out,
+                            origin,
+                            guild_id.clone(),
+                            RecentKind::Guild,
+                            epoch_ms(when),
+                        );
+                    }
+                }
+            }
+            // The currently- and last-selected guilds carry no time of their own.
+            for key in [SELECTED_GUILD_ID, LAST_SELECTED_GUILD_ID] {
+                if let Some(id) = state.get(key).and_then(Value::as_str) {
+                    if is_snowflake(id) {
+                        push_recent(out, origin, id.to_string(), RecentKind::Guild, None);
+                    }
+                }
+            }
+        }
+        RecentStore::RecentVoiceChannel => {
+            // The store name names only its first list; the second holds TEXT
+            // channels, so the kind comes from the list, never the store.
+            for (key, kind) in [
+                (VOICE_CHANNEL_HISTORY, RecentKind::VoiceChannel),
+                (TEXT_CHANNEL_HISTORY, RecentKind::TextChannel),
+            ] {
+                let ids = state.get(key).and_then(Value::as_array);
+                for id in ids.into_iter().flatten().filter_map(Value::as_str) {
+                    if is_snowflake(id) {
+                        push_recent(out, origin, id.to_string(), kind, None);
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Parse one recent-store JSON value into attributed [`RecentChannel`] entries.
+fn recents_from_store(origin: &str, store: RecentStore, json: &str) -> Vec<RecentChannel> {
     let Ok(value) = serde_json::from_str::<Value>(json) else {
         return Vec::new();
     };
-    let mut snowflakes = Vec::new();
-    collect_snowflakes(&value, &mut snowflakes);
-    snowflakes
-        .into_iter()
-        .map(|snowflake| {
-            let created_at_unix_ms = snowflake.parse::<u64>().ok().map(snowflake_timestamp_ms);
-            RecentChannel {
-                snowflake,
-                kind,
-                origin: origin.to_string(),
-                created_at_unix_ms,
-            }
-        })
-        .collect()
+    let mut out = Vec::new();
+    attributed_recents(store, state_of(&value), origin, &mut out);
+
+    // Schema tolerance: a reshaped record must still yield its ids, but an id
+    // whose role in the layout is unknown is reported as such, never guessed.
+    let mut swept = Vec::new();
+    collect_snowflakes(&value, &mut swept);
+    for snowflake in swept {
+        push_recent(&mut out, origin, snowflake, RecentKind::Unattributed, None);
+    }
+    out
 }
 
+/// Extract Discord recent-channel / recent-guild references from decoded Local
+/// Storage records. Returns an empty vec when no recent-store record is present
+/// or parseable.
 #[must_use]
 pub fn extract_recent_channels(records: &[LocalStorageRecord]) -> Vec<RecentChannel> {
     records
@@ -121,12 +260,12 @@ pub fn extract_recent_channels(records: &[LocalStorageRecord]) -> Vec<RecentChan
                 deleted: false,
                 ..
             } if is_discord_origin(origin) => {
-                let kind = match script_key.text.as_str() {
-                    SELECTED_GUILD_STORE => RecentKind::Guild,
-                    RECENT_VOICE_CHANNEL_STORE => RecentKind::VoiceChannel,
+                let store = match script_key.text.as_str() {
+                    SELECTED_GUILD_STORE => RecentStore::SelectedGuild,
+                    RECENT_VOICE_CHANNEL_STORE => RecentStore::RecentVoiceChannel,
                     _ => return None,
                 };
-                Some(recents_from_store(origin, kind, &value.text))
+                Some(recents_from_store(origin, store, &value.text))
             }
             _ => None,
         })
@@ -170,7 +309,9 @@ mod tests {
     }
 
     #[test]
-    fn extracts_guild_and_voice_snowflakes() {
+    fn extracts_guild_voice_and_text_snowflakes() {
+        // `RecentVoiceChannelStore` holds two lists: the kind of each id comes
+        // from the list it sits in, not from the store's name.
         let recs = vec![
             data(
                 "https://ptb.discord.com",
@@ -180,7 +321,7 @@ mod tests {
             data(
                 "https://ptb.discord.com",
                 "RecentVoiceChannelStore",
-                r#"{"recentChannels":["96628290369007616","155361364909588482"]}"#,
+                r#"{"_state":{"voiceChannelHistory":["96628290369007616"],"textChannelHistory":["155361364909588482"]}}"#,
             ),
         ];
         let recents = extract_recent_channels(&recs);
@@ -193,13 +334,64 @@ mod tests {
         assert_eq!(guilds.len(), 1);
         assert_eq!(guilds[0].snowflake, "81384788765712384");
         assert!(guilds[0].created_at_unix_ms.is_some());
+        // No selection time was recorded for it — never back-filled from creation.
+        assert_eq!(guilds[0].selected_at_unix_ms, None);
 
         let voice: Vec<_> = recents
             .iter()
             .filter(|r| r.kind == RecentKind::VoiceChannel)
             .collect();
-        assert_eq!(voice.len(), 2);
+        assert_eq!(voice.len(), 1);
         assert_eq!(voice[0].snowflake, "96628290369007616");
+
+        let text: Vec<_> = recents
+            .iter()
+            .filter(|r| r.kind == RecentKind::TextChannel)
+            .collect();
+        assert_eq!(text.len(), 1);
+        assert_eq!(text[0].snowflake, "155361364909588482");
+    }
+
+    #[test]
+    fn guild_selection_time_is_read_not_derived_from_the_snowflake() {
+        // 1781524800000 = 2026-06-15T12:00:00Z — years after the id's creation
+        // time, so a creation-time substitution would be unmistakable. The same id
+        // also appears as `selectedGuildId`, which must not displace the timed
+        // entry or duplicate it.
+        let recs = vec![data(
+            "https://discord.com",
+            "SelectedGuildStore",
+            r#"{"_state":{"selectedGuildId":"400000000000000001","lastSelectedGuildId":"400000000000000001","selectedGuildTimestampMillis":{"400000000000000001":1781524800000,"notASnowflake":1}}}"#,
+        )];
+        let recents = extract_recent_channels(&recs);
+        assert_eq!(recents.len(), 1, "one guild, got {recents:?}");
+        assert_eq!(recents[0].kind, RecentKind::Guild);
+        assert_eq!(recents[0].selected_at_unix_ms, Some(1_781_524_800_000));
+        assert_eq!(
+            recents[0].created_at_unix_ms,
+            Some(snowflake_timestamp_ms(400_000_000_000_000_001)),
+            "the creation time stays available as its own distinct fact"
+        );
+        assert_ne!(
+            recents[0].selected_at_unix_ms, recents[0].created_at_unix_ms,
+            "selection and creation are different facts"
+        );
+    }
+
+    #[test]
+    fn guild_selection_time_accepts_a_string_epoch() {
+        // Some client versions serialize the epoch ms as a decimal string.
+        let recs = vec![data(
+            "https://discord.com",
+            "SelectedGuildStore",
+            r#"{"_state":{"selectedGuildTimestampMillis":{"400000000000000001":"1781524800000","400000000000000002":"not a number"}}}"#,
+        )];
+        let recents = extract_recent_channels(&recs);
+        assert_eq!(recents.len(), 2);
+        assert_eq!(recents[0].selected_at_unix_ms, Some(1_781_524_800_000));
+        // An unparseable time yields None, not a substituted creation time.
+        assert_eq!(recents[1].selected_at_unix_ms, None);
+        assert!(recents[1].created_at_unix_ms.is_some());
     }
 
     #[test]
@@ -221,10 +413,10 @@ mod tests {
     }
 
     #[test]
-    fn snowflake_object_keys_are_collected() {
-        // Discord's recent-voice state is id-KEYED in some client versions: the
-        // guild snowflake is the object key, not a value. Schema-tolerant
-        // extraction must recover the key as well as the nested channel id.
+    fn unmodelled_layout_yields_unattributed_ids() {
+        // An id-KEYED shape none of the documented keys covers. Schema-tolerant
+        // extraction must still recover the key and the nested id — but their role
+        // is unknown, so they are `Unattributed` rather than labelled voice/text.
         let recs = vec![data(
             "https://discord.com",
             "RecentVoiceChannelStore",
@@ -238,7 +430,8 @@ mod tests {
             recents[0].created_at_unix_ms,
             Some(snowflake_timestamp_ms(81_384_788_765_712_384))
         );
-        assert_eq!(recents[0].kind, RecentKind::VoiceChannel);
+        assert!(recents.iter().all(|r| r.kind == RecentKind::Unattributed));
+        assert!(recents.iter().all(|r| r.selected_at_unix_ms.is_none()));
     }
 
     #[test]

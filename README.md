@@ -44,7 +44,7 @@ The token secret is **never** in that output. `artifacts.tokens[0].token` is a `
 |---|---|---|
 | Auth token (sensitive) | `token` | `TokenRecord` — value redacted by default |
 | Account identity | `MultiAccountStore`, `user_id_cache`, `email_cache` | `Account` — id, username, discriminator, avatar, email |
-| Recent channels/guilds | `SelectedGuildStore`, `RecentVoiceChannelStore` | `RecentChannel` — snowflake + decoded creation time |
+| Recent channels/guilds | `SelectedGuildStore`, `RecentVoiceChannelStore` | `RecentChannel` — guild/voice/text id, the recorded **selection** time, and the id's **creation** time (two distinct fields) |
 | Store metadata + timeline | `META:` per origin | `OriginMeta` + `DiscordArtifacts::timeline()` |
 
 Discord keeps **no local message database** — chats are server-side and only cached. Recoverable message *media* lives in the Simple Cache, read by the separate `chromium-storage-cache` crate.

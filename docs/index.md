@@ -10,7 +10,7 @@ the recoverable account evidence lives in Local Storage.
 |---|---|---|
 | Auth token (sensitive) | `token` | `TokenRecord` (secret redacted by default) |
 | Account identity | `MultiAccountStore`, `user_id_cache`, `email_cache` | `Account` |
-| Recent channels/guilds | `SelectedGuildStore`, `RecentVoiceChannelStore` | `RecentChannel` (snowflake time decoded) |
+| Recent channels/guilds | `SelectedGuildStore`, `RecentVoiceChannelStore` | `RecentChannel` (recorded selection time + snowflake creation time, kept apart) |
 | Store metadata | `META:` per origin | `OriginMeta` (WebKit last-modified) |
 
 The store paths and Chromium key/encoding constants are re-used from the fleet

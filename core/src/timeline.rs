@@ -1,10 +1,12 @@
 //! Timeline reconstruction from decoded Discord artifacts.
 //!
 //! Datable Discord evidence in Local Storage is sparse — Discord keeps no message
-//! DB — but two kinds of time survive: each recovered snowflake embeds its
-//! **creation** time, and each origin's `META:` record carries the store's
-//! **last-modified** time (a WebKit microsecond timestamp). This module folds both
-//! into the fleet [`TimelineEvent`] model, ascending by time.
+//! DB — but three kinds of time survive: the **selection** time Discord records
+//! for a guild (an activity time), the **creation** time each recovered snowflake
+//! embeds, and each origin's `META:` record last-modified time (a WebKit
+//! microsecond timestamp). This module folds all three into the fleet
+//! [`TimelineEvent`] model, ascending by time, each event naming which kind of
+//! time dates it — a creation time is never presented as activity.
 
 use crate::DiscordArtifacts;
 use chrono::{DateTime, Utc};
@@ -42,6 +44,21 @@ pub fn build_timeline(artifacts: &DiscordArtifacts) -> Vec<TimelineEvent> {
     let mut dated: Vec<(u64, TimelineEvent)> = Vec::new();
 
     for recent in &artifacts.recents {
+        // The activity time Discord recorded — a different fact from the id's
+        // creation time below, and the one that dates the user's navigation.
+        if let Some(ms) = recent.selected_at_unix_ms {
+            dated.push((
+                ms,
+                TimelineEvent {
+                    when: unix_ms_to_rfc3339(ms),
+                    source: SOURCE.to_string(),
+                    event: format!(
+                        "{:?} {} selected (selection time recorded by Discord)",
+                        recent.kind, recent.snowflake
+                    ),
+                },
+            ));
+        }
         if let Some(ms) = recent.created_at_unix_ms {
             dated.push((
                 ms,

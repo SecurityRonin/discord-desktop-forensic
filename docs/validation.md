@@ -133,6 +133,28 @@ PYTHONPATH=/path/to/ccl_chromium_reader \
   cargo test -p discord-desktop-core --test differential_ccl -- --nocapture
 ```
 
+## Source differential against DLEAPP (tier-1 for the semantics)
+
+The *meaning* of the recent-navigation records — which JSON key holds which fact —
+is reconciled against an independent reference implementation of the same
+artifact, [DLEAPP](https://github.com/abrignoni/DLEAPP)'s
+`scripts/artifacts/discordLocalStorage.py` (`discordActivity`). The answer key
+there is authored by another party, so it is a genuine external check on the
+semantics (not on our bytes):
+
+| Fact | DLEAPP reads | This reader |
+|---|---|---|
+| Guild selection (activity) time | `SelectedGuildStore._state.selectedGuildTimestampMillis[guildId]`, epoch ms → "Server selected" | `RecentChannel::selected_at_unix_ms` |
+| Guild/channel creation time | not reported | `RecentChannel::created_at_unix_ms`, decoded from the snowflake, labelled as creation |
+| Recent voice channels | `RecentVoiceChannelStore._state.voiceChannelHistory` → "Recent voice channel" | `RecentKind::VoiceChannel` |
+| Recent text channels | `RecentVoiceChannelStore._state.textChannelHistory` → "Recent text channel" | `RecentKind::TextChannel` |
+
+`core/tests/oracle.rs::recent_guild_activity_time_is_the_recorded_selection_time`
+and `::recent_text_channels_are_not_labelled_voice_channels` hold this
+reconciliation, over a minted store whose recorded selection time is 3,079 days
+away from the guild id's creation time — so substituting one for the other cannot
+pass unnoticed.
+
 ## Panic-freedom — fuzzing (tier-2)
 
 Two `cargo-fuzz` targets exercise every parsed structure against arbitrary input

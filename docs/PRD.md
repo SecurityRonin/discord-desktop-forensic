@@ -27,10 +27,13 @@ In scope:
   `user_id_cache`.
 - **Auth token** — the `token` Local Storage record, redacted by default; flagged
   by the analyzer as a sensitive credential (presence + location, MITRE T1528).
-- **Recent channels/guilds** — snowflake references from `SelectedGuildStore` /
-  `RecentVoiceChannelStore`, with the snowflake creation time decoded.
+- **Recent channels/guilds** — guild ids from `SelectedGuildStore` and voice/text
+  channel ids from `RecentVoiceChannelStore`, each carrying the **selection**
+  (activity) time Discord recorded and, separately, the id's **creation** time
+  decoded from the snowflake. The two are never conflated.
 - **Store metadata + timeline** — per-origin `META:` last-modified times folded
-  into an ascending timeline alongside snowflake creation times.
+  into an ascending timeline alongside the selection and creation times, each
+  event naming which kind of time dates it.
 
 Out of scope (deliberate):
 
