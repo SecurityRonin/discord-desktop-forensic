@@ -363,6 +363,37 @@ mod tests {
     }
 
     #[test]
+    fn an_id_in_both_history_lists_is_reported_once_per_list() {
+        // A channel the user both spoke and typed in is listed by Discord in
+        // BOTH `voiceChannelHistory` and `textChannelHistory`. The two
+        // appearances are separate facts about separate activity, so neither may
+        // be dropped as a duplicate of the other (DLEAPP emits a row per list).
+        let recs = vec![data(
+            "https://discord.com",
+            "RecentVoiceChannelStore",
+            r#"{"_state":{"voiceChannelHistory":["700000000000000004"],"textChannelHistory":["700000000000000004"]}}"#,
+        )];
+        let recents = extract_recent_channels(&recs);
+        assert!(
+            recents
+                .iter()
+                .any(|r| r.snowflake == "700000000000000004" && r.kind == RecentKind::VoiceChannel),
+            "voiceChannelHistory appearance missing, got {recents:?}"
+        );
+        assert!(
+            recents
+                .iter()
+                .any(|r| r.snowflake == "700000000000000004" && r.kind == RecentKind::TextChannel),
+            "textChannelHistory appearance dropped as a duplicate of the voice \
+             entry, got {recents:?}"
+        );
+        // Exactly the two attributed appearances — the same id twice in one list
+        // still collapses, and the unattributed sweep adds nothing for an id the
+        // layout already explains.
+        assert_eq!(recents.len(), 2, "one entry per list, got {recents:?}");
+    }
+
+    #[test]
     fn guild_selection_time_is_read_not_derived_from_the_snowflake() {
         // 1781524800000 = 2026-06-15T12:00:00Z — years after the id's creation
         // time, so a creation-time substitution would be unmistakable. The same id
