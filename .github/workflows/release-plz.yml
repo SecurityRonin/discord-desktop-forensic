@@ -19,6 +19,11 @@ permissions:
 on:
   push:
     branches: [main]
+  # Manual re-run. Needed whenever release-plz's view of main gets out of step
+  # with the branch — e.g. after a history rewrite, or when the releasable commit
+  # landed in a run that failed — so a release can be cut without inventing a
+  # throwaway commit just to fire the push trigger.
+  workflow_dispatch:
 
 concurrency:
   group: release-plz-${{ github.ref }}
