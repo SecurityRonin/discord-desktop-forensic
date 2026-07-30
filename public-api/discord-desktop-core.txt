@@ -1,0 +1,95 @@
+pub mod discord_desktop_core
+pub mod discord_desktop_core::account
+pub struct discord_desktop_core::account::Account
+pub discord_desktop_core::account::Account::avatar: core::option::Option<alloc::string::String>
+pub discord_desktop_core::account::Account::discriminator: core::option::Option<alloc::string::String>
+pub discord_desktop_core::account::Account::email: core::option::Option<alloc::string::String>
+pub discord_desktop_core::account::Account::origin: alloc::string::String
+pub discord_desktop_core::account::Account::token_status: core::option::Option<i64>
+pub discord_desktop_core::account::Account::user_id: core::option::Option<alloc::string::String>
+pub discord_desktop_core::account::Account::username: core::option::Option<alloc::string::String>
+pub fn discord_desktop_core::account::extract_accounts(&[chromium_storage_localstorage::LocalStorageRecord]) -> alloc::vec::Vec<discord_desktop_core::account::Account>
+pub mod discord_desktop_core::channel
+#[non_exhaustive] pub enum discord_desktop_core::channel::RecentKind
+pub discord_desktop_core::channel::RecentKind::Guild
+pub discord_desktop_core::channel::RecentKind::TextChannel
+pub discord_desktop_core::channel::RecentKind::Unattributed
+pub discord_desktop_core::channel::RecentKind::VoiceChannel
+#[non_exhaustive] pub struct discord_desktop_core::channel::RecentChannel
+pub discord_desktop_core::channel::RecentChannel::created_at_unix_ms: core::option::Option<u64>
+pub discord_desktop_core::channel::RecentChannel::kind: discord_desktop_core::channel::RecentKind
+pub discord_desktop_core::channel::RecentChannel::origin: alloc::string::String
+pub discord_desktop_core::channel::RecentChannel::selected_at_unix_ms: core::option::Option<u64>
+pub discord_desktop_core::channel::RecentChannel::snowflake: alloc::string::String
+pub const discord_desktop_core::channel::DISCORD_EPOCH_MS: u64
+pub fn discord_desktop_core::channel::extract_recent_channels(&[chromium_storage_localstorage::LocalStorageRecord]) -> alloc::vec::Vec<discord_desktop_core::channel::RecentChannel>
+pub fn discord_desktop_core::channel::snowflake_timestamp_ms(u64) -> u64
+pub mod discord_desktop_core::error
+#[non_exhaustive] pub enum discord_desktop_core::error::Error
+pub discord_desktop_core::error::Error::LocalStorage(leveldb_core::error::Error)
+pub discord_desktop_core::error::Error::SpecMissing
+pub discord_desktop_core::error::Error::StoreMissing(&'static str)
+pub mod discord_desktop_core::timeline
+pub const discord_desktop_core::timeline::WEBKIT_EPOCH_OFFSET_MICROS: u64
+pub fn discord_desktop_core::timeline::build_timeline(&discord_desktop_core::DiscordArtifacts) -> alloc::vec::Vec<forensicnomicon_core::report::TimelineEvent>
+pub fn discord_desktop_core::timeline::unix_ms_to_rfc3339(u64) -> core::option::Option<alloc::string::String>
+pub fn discord_desktop_core::timeline::webkit_micros_to_unix_ms(u64) -> core::option::Option<u64>
+pub mod discord_desktop_core::token
+pub struct discord_desktop_core::token::SensitiveToken
+impl discord_desktop_core::token::SensitiveToken
+pub fn discord_desktop_core::token::SensitiveToken::is_empty(&self) -> bool
+pub fn discord_desktop_core::token::SensitiveToken::len(&self) -> usize
+pub fn discord_desktop_core::token::SensitiveToken::new(impl core::convert::Into<alloc::string::String>) -> Self
+pub fn discord_desktop_core::token::SensitiveToken::redacted(&self) -> alloc::string::String
+pub fn discord_desktop_core::token::SensitiveToken::reveal(&self) -> &str
+impl core::fmt::Debug for discord_desktop_core::token::SensitiveToken
+pub fn discord_desktop_core::token::SensitiveToken::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for discord_desktop_core::token::SensitiveToken
+pub fn discord_desktop_core::token::SensitiveToken::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl serde_core::ser::Serialize for discord_desktop_core::token::SensitiveToken
+pub fn discord_desktop_core::token::SensitiveToken::serialize<S: serde_core::ser::Serializer>(&self, S) -> core::result::Result<<S as serde_core::ser::Serializer>::Ok, <S as serde_core::ser::Serializer>::Error>
+pub struct discord_desktop_core::token::TokenRecord
+pub discord_desktop_core::token::TokenRecord::deleted: bool
+pub discord_desktop_core::token::TokenRecord::origin: alloc::string::String
+pub discord_desktop_core::token::TokenRecord::seq: u64
+pub discord_desktop_core::token::TokenRecord::token: discord_desktop_core::token::SensitiveToken
+pub fn discord_desktop_core::token::extract_tokens(&[chromium_storage_localstorage::LocalStorageRecord]) -> alloc::vec::Vec<discord_desktop_core::token::TokenRecord>
+#[non_exhaustive] pub enum discord_desktop_core::Error
+pub discord_desktop_core::Error::LocalStorage(leveldb_core::error::Error)
+pub discord_desktop_core::Error::SpecMissing
+pub discord_desktop_core::Error::StoreMissing(&'static str)
+pub struct discord_desktop_core::Account
+pub discord_desktop_core::Account::avatar: core::option::Option<alloc::string::String>
+pub discord_desktop_core::Account::discriminator: core::option::Option<alloc::string::String>
+pub discord_desktop_core::Account::email: core::option::Option<alloc::string::String>
+pub discord_desktop_core::Account::origin: alloc::string::String
+pub discord_desktop_core::Account::token_status: core::option::Option<i64>
+pub discord_desktop_core::Account::user_id: core::option::Option<alloc::string::String>
+pub discord_desktop_core::Account::username: core::option::Option<alloc::string::String>
+pub struct discord_desktop_core::DiscordArtifacts
+pub discord_desktop_core::DiscordArtifacts::accounts: alloc::vec::Vec<discord_desktop_core::account::Account>
+pub discord_desktop_core::DiscordArtifacts::origins: alloc::vec::Vec<discord_desktop_core::OriginMeta>
+pub discord_desktop_core::DiscordArtifacts::recents: alloc::vec::Vec<discord_desktop_core::channel::RecentChannel>
+pub discord_desktop_core::DiscordArtifacts::tokens: alloc::vec::Vec<discord_desktop_core::token::TokenRecord>
+impl discord_desktop_core::DiscordArtifacts
+pub fn discord_desktop_core::DiscordArtifacts::timeline(&self) -> alloc::vec::Vec<forensicnomicon_core::report::TimelineEvent>
+pub struct discord_desktop_core::OriginMeta
+pub discord_desktop_core::OriginMeta::last_modified_unix_ms: core::option::Option<u64>
+pub discord_desktop_core::OriginMeta::origin: alloc::string::String
+pub discord_desktop_core::OriginMeta::seq: u64
+pub discord_desktop_core::OriginMeta::size: core::option::Option<u64>
+#[non_exhaustive] pub struct discord_desktop_core::RecentChannel
+pub discord_desktop_core::RecentChannel::created_at_unix_ms: core::option::Option<u64>
+pub discord_desktop_core::RecentChannel::kind: discord_desktop_core::channel::RecentKind
+pub discord_desktop_core::RecentChannel::origin: alloc::string::String
+pub discord_desktop_core::RecentChannel::selected_at_unix_ms: core::option::Option<u64>
+pub discord_desktop_core::RecentChannel::snowflake: alloc::string::String
+pub struct discord_desktop_core::TokenRecord
+pub discord_desktop_core::TokenRecord::deleted: bool
+pub discord_desktop_core::TokenRecord::origin: alloc::string::String
+pub discord_desktop_core::TokenRecord::seq: u64
+pub discord_desktop_core::TokenRecord::token: discord_desktop_core::token::SensitiveToken
+pub fn discord_desktop_core::decode_local_storage(&[chromium_storage_localstorage::LocalStorageRecord]) -> discord_desktop_core::DiscordArtifacts
+pub fn discord_desktop_core::extract_origin_meta(&[chromium_storage_localstorage::LocalStorageRecord]) -> alloc::vec::Vec<discord_desktop_core::OriginMeta>
+pub fn discord_desktop_core::is_discord_origin(&str) -> bool
+pub fn discord_desktop_core::read_profile(&std::path::Path) -> core::result::Result<discord_desktop_core::DiscordArtifacts, discord_desktop_core::error::Error>

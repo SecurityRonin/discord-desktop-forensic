@@ -1,0 +1,20 @@
+pub mod discord_desktop_forensic
+pub enum discord_desktop_forensic::DiscordCredentialFinding
+pub discord_desktop_forensic::DiscordCredentialFinding::AuthTokenPresent
+pub discord_desktop_forensic::DiscordCredentialFinding::AuthTokenPresent::origin: alloc::string::String
+pub discord_desktop_forensic::DiscordCredentialFinding::AuthTokenPresent::seq: u64
+pub discord_desktop_forensic::DiscordCredentialFinding::AuthTokenPresent::token_len: usize
+pub discord_desktop_forensic::DiscordCredentialFinding::DeletedTokenRecoverable
+pub discord_desktop_forensic::DiscordCredentialFinding::DeletedTokenRecoverable::origin: alloc::string::String
+pub discord_desktop_forensic::DiscordCredentialFinding::DeletedTokenRecoverable::seq: u64
+pub discord_desktop_forensic::DiscordCredentialFinding::DeletedTokenRecoverable::token_len: usize
+impl forensicnomicon_core::report::Observation for discord_desktop_forensic::DiscordCredentialFinding
+pub fn discord_desktop_forensic::DiscordCredentialFinding::category(&self) -> forensicnomicon_core::report::Category
+pub fn discord_desktop_forensic::DiscordCredentialFinding::code(&self) -> &'static str
+pub fn discord_desktop_forensic::DiscordCredentialFinding::evidence(&self) -> alloc::vec::Vec<forensicnomicon_core::report::Evidence>
+pub fn discord_desktop_forensic::DiscordCredentialFinding::mitre(&self) -> &'static [&'static str]
+pub fn discord_desktop_forensic::DiscordCredentialFinding::note(&self) -> alloc::string::String
+pub fn discord_desktop_forensic::DiscordCredentialFinding::severity(&self) -> core::option::Option<forensicnomicon_core::report::Severity>
+pub fn discord_desktop_forensic::DiscordCredentialFinding::subjects(&self) -> alloc::vec::Vec<forensicnomicon_core::report::SubjectRef>
+pub const discord_desktop_forensic::ANALYZER: &str
+pub fn discord_desktop_forensic::audit_artifacts(&discord_desktop_core::DiscordArtifacts) -> alloc::vec::Vec<forensicnomicon_core::report::Finding>
