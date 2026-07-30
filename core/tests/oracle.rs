@@ -17,6 +17,7 @@
 
 use discord_desktop_core::channel::RecentKind;
 use discord_desktop_core::read_profile;
+use discord_desktop_core::timeline::unix_ms_to_rfc3339;
 use std::path::Path;
 
 /// Build a Chromium Local Storage **data key**: `_` + origin + NUL + Latin-1
@@ -99,6 +100,126 @@ fn minted_leveldb_round_trips_all_artifact_classes() {
             .iter()
             .any(|r| r.kind == RecentKind::Guild && r.snowflake == "81384788765712384"),
         "recent guild snowflake, got {:?}",
+        artifacts.recents
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Client-activity records: the times Discord itself records, vs snowflake
+// creation times.
+//
+// `SelectedGuildStore._state.selectedGuildTimestampMillis` is a guildId → epoch
+// **milliseconds** map holding when each guild was last selected — the activity
+// time. That is the value DLEAPP's `discordLocalStorage.py` reports as
+// "Server selected". A snowflake's embedded time is the guild's **creation**
+// time, an unrelated fact: for the ids below they are 3,079 days apart, so a
+// reader that reports creation time as the activity time is unmistakably wrong.
+//
+// `RecentVoiceChannelStore._state` likewise carries **two** history lists —
+// `voiceChannelHistory` and `textChannelHistory` — so the store name does not
+// determine the kind of every id inside it.
+//
+// All ids are obviously synthetic (`400…`/`500…`/`600…`).
+
+/// Synthetic guild id; snowflake creation time 2018-01-08T18:57:11.640Z.
+const SYNTH_GUILD_ID: &str = "400000000000000001";
+/// Synthetic voice-channel id; snowflake creation time 2018-10-11T17:41:29.550Z.
+const SYNTH_VOICE_CHANNEL_ID: &str = "500000000000000002";
+/// Synthetic text-channel id; snowflake creation time 2019-07-14T16:25:47.460Z.
+const SYNTH_TEXT_CHANNEL_ID: &str = "600000000000000003";
+/// 2026-06-15T12:00:00Z — the recorded selection time for `SYNTH_GUILD_ID`,
+/// 3,079 days after that id's snowflake creation time.
+const SYNTH_GUILD_SELECTED_MS: u64 = 1_781_524_800_000;
+/// `SYNTH_GUILD_ID >> 22` + the Discord epoch: the guild's creation time.
+const SYNTH_GUILD_CREATED_MS: u64 = 1_515_437_831_640;
+
+const SELECTED_GUILD_WITH_TIMES: &str = r#"{"_state":{"selectedGuildId":"400000000000000001","lastSelectedGuildId":"400000000000000001","selectedGuildTimestampMillis":{"400000000000000001":1781524800000}}}"#;
+const RECENT_VOICE_CHANNELS: &str = r#"{"_state":{"voiceChannelHistory":["500000000000000002"],"textChannelHistory":["600000000000000003"]}}"#;
+
+/// Mint a real LevelDB profile carrying the client-activity stores above.
+///
+/// Deliberately separate from [`mint_discord_profile`], whose record set the ccl
+/// differential mirrors byte-for-byte.
+fn mint_discord_activity_profile(dir: &Path) {
+    let leveldb_dir = dir.join("Local Storage").join("leveldb");
+    std::fs::create_dir_all(&leveldb_dir).unwrap();
+
+    let opt = rusty_leveldb::Options {
+        create_if_missing: true,
+        ..Default::default()
+    };
+    let mut db = rusty_leveldb::DB::open(&leveldb_dir, opt).unwrap();
+    db.put(
+        &data_key(ORIGIN, "SelectedGuildStore"),
+        &latin1_value(SELECTED_GUILD_WITH_TIMES),
+    )
+    .unwrap();
+    db.put(
+        &data_key(ORIGIN, "RecentVoiceChannelStore"),
+        &latin1_value(RECENT_VOICE_CHANNELS),
+    )
+    .unwrap();
+    db.flush().unwrap();
+    drop(db);
+}
+
+#[test]
+fn recent_guild_activity_time_is_the_recorded_selection_time() {
+    let tmp = tempfile::tempdir().unwrap();
+    mint_discord_activity_profile(tmp.path());
+    let artifacts = read_profile(tmp.path()).expect("read minted Discord activity profile");
+
+    let selected = unix_ms_to_rfc3339(SYNTH_GUILD_SELECTED_MS).unwrap();
+    let created = unix_ms_to_rfc3339(SYNTH_GUILD_CREATED_MS).unwrap();
+    let events = artifacts.timeline();
+
+    // The activity event must be dated at the time Discord recorded, not at the
+    // guild id's creation time.
+    assert!(
+        events
+            .iter()
+            .any(|e| e.when.as_deref() == Some(selected.as_str())
+                && e.event.contains(SYNTH_GUILD_ID)),
+        "no timeline event dated at the guild's recorded selection time {selected} \
+         (selectedGuildTimestampMillis); creation time is {created}\nevents: {events:#?}"
+    );
+
+    // The creation time is a legitimate separate fact and must still surface —
+    // labelled as creation, never as the activity time.
+    assert!(
+        events
+            .iter()
+            .any(|e| e.when.as_deref() == Some(created.as_str())
+                && e.event.contains(SYNTH_GUILD_ID)
+                && e.event.contains("creation")),
+        "the snowflake creation time {created} must still surface, labelled as \
+         creation\nevents: {events:#?}"
+    );
+}
+
+#[test]
+fn recent_text_channels_are_not_labelled_voice_channels() {
+    let tmp = tempfile::tempdir().unwrap();
+    mint_discord_activity_profile(tmp.path());
+    let artifacts = read_profile(tmp.path()).expect("read minted Discord activity profile");
+
+    assert!(
+        artifacts
+            .recents
+            .iter()
+            .any(|r| r.snowflake == SYNTH_VOICE_CHANNEL_ID && r.kind == RecentKind::VoiceChannel),
+        "voiceChannelHistory id {SYNTH_VOICE_CHANNEL_ID} must be a voice channel, \
+         got {:?}",
+        artifacts.recents
+    );
+    assert!(
+        !artifacts
+            .recents
+            .iter()
+            .any(|r| r.snowflake == SYNTH_TEXT_CHANNEL_ID && r.kind == RecentKind::VoiceChannel),
+        "textChannelHistory id {SYNTH_TEXT_CHANNEL_ID} is labelled a voice channel; \
+         RecentVoiceChannelStore carries both voiceChannelHistory and \
+         textChannelHistory\ngot {:?}",
         artifacts.recents
     );
 }
