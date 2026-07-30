@@ -9,7 +9,7 @@ authors.workspace = true
 readme.workspace = true
 categories.workspace = true
 # Published library: a deliberately LOW, CI-verified MSRV floor.
-rust-version = "1.80"
+rust-version = "1.87"
 description = "Discord desktop (Electron/Chromium) artifact reader — interprets the Local Storage LevelDB account identity, recent channels/guilds, and the auth 'token' record (redacted by default) on top of the Chromium storage readers. Panic-free, fuzzed."
 documentation = "https://docs.rs/discord-desktop-core"
 keywords = ["forensics", "discord", "dfir", "chromium", "leveldb"]
