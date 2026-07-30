@@ -160,9 +160,13 @@ fn epoch_ms(value: &Value) -> Option<u64> {
     value.as_u64().or_else(|| value.as_str()?.parse().ok())
 }
 
-/// Add one entry, keeping the first (most specific) attribution of an id within a
-/// record — the guild-timestamp map is walked before the bare selected-guild keys,
-/// so an id with a recorded selection time keeps it.
+/// Add one entry, keeping the first (most specific) attribution of an id *for a
+/// given kind* within a record — the guild-timestamp map is walked before the bare
+/// selected-guild keys, so an id with a recorded selection time keeps it.
+///
+/// Deduplication is on the (snowflake, kind) pair, not the id alone: one channel
+/// can legitimately sit in both `voiceChannelHistory` and `textChannelHistory`,
+/// and each appearance is its own fact.
 fn push_recent(
     out: &mut Vec<RecentChannel>,
     origin: &str,
@@ -170,7 +174,10 @@ fn push_recent(
     kind: RecentKind,
     selected_at_unix_ms: Option<u64>,
 ) {
-    if out.iter().any(|entry| entry.snowflake == snowflake) {
+    if out
+        .iter()
+        .any(|entry| entry.snowflake == snowflake && entry.kind == kind)
+    {
         return;
     }
     let created_at_unix_ms = snowflake.parse::<u64>().ok().map(snowflake_timestamp_ms);
@@ -250,6 +257,12 @@ fn recents_from_store(origin: &str, store: RecentStore, json: &str) -> Vec<Recen
     let mut swept = Vec::new();
     collect_snowflakes(&value, &mut swept);
     for snowflake in swept {
+        // `Unattributed` is the fallback for an id the layout does not explain, so
+        // it never accompanies an attribution: skip on the id alone here, unlike
+        // the (id, kind) rule that lets one channel be both voice and text.
+        if out.iter().any(|entry| entry.snowflake == snowflake) {
+            continue;
+        }
         push_recent(&mut out, origin, snowflake, RecentKind::Unattributed, None);
     }
     out
