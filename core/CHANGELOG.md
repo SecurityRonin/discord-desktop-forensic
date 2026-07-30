@@ -6,6 +6,14 @@ All notable changes to this crate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/SecurityRonin/discord-desktop-forensic/compare/discord-desktop-core-v0.1.0...discord-desktop-core-v0.2.0) - 2026-07-30
+
+### Fixed
+
+- *(channel)* [**breaking**] mark RecentKind/RecentChannel non_exhaustive; source the error figures
+- *(channel)* read the recorded selection time; label text vs voice recents
+- *(differential)* collapse ccl oracle to highest-seq-per-key + honest scope
+
 ## [0.1.0](https://github.com/SecurityRonin/discord-desktop-forensic/releases/tag/discord-desktop-core-v0.1.0) - 2026-07-29
 
 ### Added

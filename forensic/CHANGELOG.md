@@ -6,6 +6,12 @@ All notable changes to this crate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/SecurityRonin/discord-desktop-forensic/compare/discord-desktop-forensic-v0.1.0...discord-desktop-forensic-v0.2.0) - 2026-07-30
+
+### Fixed
+
+- *(channel)* read the recorded selection time; label text vs voice recents
+
 ## [0.1.0](https://github.com/SecurityRonin/discord-desktop-forensic/releases/tag/discord-desktop-forensic-v0.1.0) - 2026-07-29
 
 ### Added

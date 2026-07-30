@@ -10,7 +10,7 @@ members = [
 # Single source of truth for the fields every member shares (DRY): bump version /
 # edition / license here once; members inherit via `field.workspace = true`.
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/SecurityRonin/discord-desktop-forensic"
@@ -21,7 +21,7 @@ categories = ["parsing"]
 
 [workspace.dependencies]
 # Intra-workspace: the analyzer depends on the reader.
-discord-desktop-core = { version = "0.1", path = "core" }
+discord-desktop-core = { version = "0.2", path = "core" }
 # Fleet crates: registry carets — each is now published on crates.io, so the
 # PARSER consumes the published version (no local path).
 #
