@@ -22,6 +22,34 @@ fleet Test-Data-Provenance standard. The single fleet-wide index is
   `docs/validation.md`).
 - **Note:** the fixture token is a non-credential placeholder string; redaction
   only measures length, so no real-shaped secret is needed or committed.
+- **Records written (the ground truth), origin `https://ptb.discord.com`:**
+  - `token` = `SYNTHETIC-DISCORD-TOKEN-FIXTURE-not-a-real-credential-000`
+  - `MultiAccountStore` = `{"_state":{"users":[{"id":"700000000000000000","username":"testuser","discriminator":"0","avatar":"abc","tokenStatus":2}]}}`
+  - `SelectedGuildStore` = `{"selectedGuildId":"81384788765712384"}`
+
+## Independent oracle — `ccl_chromium_reader` differential
+
+`core/tests/differential_ccl.rs::differential_matches_ccl_chromium_reader` mints the
+same store shape (`core/tests/differential_ccl.rs::mint_discord_leveldb`) and then
+reconciles our `chromium_storage_localstorage::read_dir` decode against
+**`cclgroupltd/ccl_chromium_reader`** — a third-party Python implementation of the
+same LevelDB/Chromium-storage decode — reading the identical bytes. Two independent
+implementations agreeing on the storage layer is the tier-1 evidence; the Discord
+*decode* on top of it stays tier-3 (see `docs/validation.md`).
+
+Driver script (committed): `core/tests/ccl_oracle.py` — emits a hex/TSV line stream
+(`ORIGIN\t<hex>` and `DATA\t<hex origin>\t<hex script_key>\t<hex value>`).
+
+```sh
+PYTHONPATH=/path/to/ccl_chromium_reader \
+  CCL_DISCORD_ORACLE=$(which python3) \
+  cargo test -p discord-desktop-core --test differential_ccl -- --nocapture
+```
+
+| Env var | Purpose |
+|---|---|
+| `CCL_DISCORD_ORACLE` | a Python interpreter that can `import ccl_chromium_reader`; unset ⇒ skip |
+| `CCL_DISCORD_DIR` | optional — read an existing `Local Storage/leveldb` dir instead of minting one |
 
 ## REAL-ext — real Discord profile (host-only, env-gated, NOT committed)
 
