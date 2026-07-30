@@ -253,4 +253,38 @@ mod tests {
         let recs = vec![data("https://evil.example", "MultiAccountStore", MULTI)];
         assert!(extract_accounts(&recs).is_empty());
     }
+
+    #[test]
+    fn store_with_no_users_array_yields_no_account() {
+        // Valid JSON, but `_state.users` is absent or reshaped to an id-keyed
+        // object instead of an array — a client version we cannot read as rows.
+        for json in [
+            r#"{"_state":{}}"#,
+            r#"{"_state":{"users":{"700000000000000000":{"username":"testuser"}}}}"#,
+            r#"{"other":1}"#,
+        ] {
+            let recs = vec![data("https://discord.com", "MultiAccountStore", json)];
+            assert!(
+                extract_accounts(&recs).is_empty(),
+                "no rows expected from {json}"
+            );
+        }
+    }
+
+    #[test]
+    fn non_string_session_cache_is_ignored() {
+        // Discord stores both caches as JSON *string* literals. A bare number or
+        // unparseable text is a shape violation: it must be dropped, never coerced
+        // into an id/email (a wrong user_id would misattribute the session).
+        for value in ["700000000000000000", "{not json", "null"] {
+            let recs = vec![
+                data("https://discord.com", "user_id_cache", value),
+                data("https://discord.com", "email_cache", value),
+            ];
+            assert!(
+                extract_accounts(&recs).is_empty(),
+                "no synthesized account expected from {value}"
+            );
+        }
+    }
 }

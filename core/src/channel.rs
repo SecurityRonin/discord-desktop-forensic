@@ -221,6 +221,27 @@ mod tests {
     }
 
     #[test]
+    fn snowflake_object_keys_are_collected() {
+        // Discord's recent-voice state is id-KEYED in some client versions: the
+        // guild snowflake is the object key, not a value. Schema-tolerant
+        // extraction must recover the key as well as the nested channel id.
+        let recs = vec![data(
+            "https://discord.com",
+            "RecentVoiceChannelStore",
+            r#"{"81384788765712384":{"channelId":"96628290369007616"},"notASnowflake":1}"#,
+        )];
+        let recents = extract_recent_channels(&recs);
+        let ids: Vec<&str> = recents.iter().map(|r| r.snowflake.as_str()).collect();
+        assert_eq!(ids, ["81384788765712384", "96628290369007616"]);
+        // The key-derived entry decodes its embedded creation time like any other.
+        assert_eq!(
+            recents[0].created_at_unix_ms,
+            Some(snowflake_timestamp_ms(81_384_788_765_712_384))
+        );
+        assert_eq!(recents[0].kind, RecentKind::VoiceChannel);
+    }
+
+    #[test]
     fn malformed_json_yields_nothing() {
         let recs = vec![data(
             "https://discord.com",
