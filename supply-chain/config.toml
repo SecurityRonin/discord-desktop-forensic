@@ -42,10 +42,6 @@ criteria = "safe-to-run"
 version = "1.0.4"
 criteria = "safe-to-run"
 
-[[exemptions.chromium-storage-localstorage]]
-version = "0.1.0"
-criteria = "safe-to-deploy"
-
 [[exemptions.chrono]]
 version = "0.4.45"
 criteria = "safe-to-deploy"
@@ -65,10 +61,6 @@ criteria = "safe-to-run"
 [[exemptions.find-msvc-tools]]
 version = "0.1.9"
 criteria = "safe-to-run"
-
-[[exemptions.forensicnomicon-core]]
-version = "1.5.0"
-criteria = "safe-to-deploy"
 
 [[exemptions.fs2]]
 version = "0.4.3"
@@ -92,10 +84,6 @@ criteria = "safe-to-deploy"
 
 [[exemptions.itoa]]
 version = "1.0.18"
-criteria = "safe-to-deploy"
-
-[[exemptions.leveldb-core]]
-version = "0.1.1"
 criteria = "safe-to-deploy"
 
 [[exemptions.libc]]
@@ -137,10 +125,6 @@ criteria = "safe-to-run"
 [[exemptions.rusty-leveldb]]
 version = "4.0.1"
 criteria = "safe-to-run"
-
-[[exemptions.safe-read]]
-version = "0.2.1"
-criteria = "safe-to-deploy"
 
 [[exemptions.semver]]
 version = "1.0.28"
