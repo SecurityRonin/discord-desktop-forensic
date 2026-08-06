@@ -6,6 +6,14 @@ All notable changes to this crate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.1](https://github.com/SecurityRonin/discord-desktop-forensic/compare/discord-desktop-core-v0.2.0...discord-desktop-core-v0.2.1) - 2026-08-06
+
+### Fixed
+
+- *(lint)* fix the MSRV-gated lints exposed by the 1.87 declaration
+- *(msrv)* correct false per-crate rust-version declarations to 1.87
+- *(channel)* dedupe recents on (snowflake, kind), not the id alone
+
 ## [0.2.0](https://github.com/SecurityRonin/discord-desktop-forensic/compare/discord-desktop-core-v0.1.0...discord-desktop-core-v0.2.0) - 2026-07-30
 
 ### Fixed
