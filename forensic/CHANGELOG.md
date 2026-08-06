@@ -6,6 +6,12 @@ All notable changes to this crate are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.1](https://github.com/SecurityRonin/discord-desktop-forensic/compare/discord-desktop-forensic-v0.2.0...discord-desktop-forensic-v0.2.1) - 2026-08-06
+
+### Fixed
+
+- *(msrv)* correct false per-crate rust-version declarations to 1.87
+
 ## [0.2.0](https://github.com/SecurityRonin/discord-desktop-forensic/compare/discord-desktop-forensic-v0.1.0...discord-desktop-forensic-v0.2.0) - 2026-07-30
 
 ### Fixed
